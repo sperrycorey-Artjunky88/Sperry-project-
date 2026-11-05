@@ -71,3 +71,15 @@ python tests/browser_test.py
 ```
 
 They create synthetic tasks only and run a local HTTP server on port 8765. They do not use or access your existing browser profile. No GitHub Actions workflow was added or run, avoiding unapproved automation charges or deployment triggers.
+
+## Shared-storage preparation (not deployed)
+
+The `server/` modules and additive SQL schema prepare a shared revision store and owner-only API for the existing Sites host. They are not included in `dist/`, not connected to the current frontend, and do not provision resources or make AI calls. See [connection options, verified official sources, and integration gates](docs/ai-connection-options.md).
+
+Additional offline tests use Node 22.13+ / Node 24 built-in SQLite, with no package installation:
+
+```sh
+node --test tests/*.test.mjs
+```
+
+No real task data is included in test fixtures. Live cross-browser sync still requires the trusted Sites Worker wrapper, approved D1 setup, explicit migration, independent backup/restore validation, and deployment approval.
