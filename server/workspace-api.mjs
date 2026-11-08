@@ -1,7 +1,7 @@
 // Unwired preparation. Identity must come from a trusted Sites server wrapper.
 // Never pass a body/query/client header as authenticatedUserId or ownerId.
 import {mergeBackup} from '../dist/core.mjs';
-import {readBackup} from '../dist/storage.mjs';
+import {readBackup,checksum} from '../dist/storage.mjs';
 import {ConflictError,RecordError} from './shared-store.mjs';
 class HttpError extends Error {constructor(status,message){super(message);this.status=status;}}
 function response(status,data,revision){return Response.json(data,{status,headers:{'Cache-Control':'no-store',...(revision===undefined?{}:{ETag:`"${revision}"`})}});}
@@ -20,7 +20,7 @@ export function createWorkspaceApi({store,ownerId,maxBytes=2*1024*1024}){
   try{
    const url=new URL(request.url),path=url.pathname;
    if(!['/api/workspace','/api/import'].includes(path))return response(404,{error:'Unknown endpoint.'});
-   if(request.method==='GET'&&path==='/api/workspace'){const current=await store.read(ownerId);return response(200,current,current.revision);}
+   if(request.method==='GET'&&path==='/api/workspace'){const current=await store.read(ownerId);return response(200,{...current,checksum:await checksum(JSON.stringify(current.state))},current.revision);}
    if(!((request.method==='PUT'&&path==='/api/workspace')||(request.method==='POST'&&path==='/api/import')))return response(405,{error:'Unsupported method.'});
    if(request.headers.get('Origin')!==url.origin)return response(403,{error:'Use a same-origin request.'});
    const match=/^"(0|[1-9]\d*)"$/.exec(request.headers.get('If-Match')||'');

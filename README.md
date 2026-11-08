@@ -72,14 +72,24 @@ python tests/browser_test.py
 
 They create synthetic tasks only and run a local HTTP server on port 8765. They do not use or access your existing browser profile. No GitHub Actions workflow was added or run, avoiding unapproved automation charges or deployment triggers.
 
-## Shared-storage preparation (not deployed)
+## Shared-storage integration (source complete, not deployed)
 
-The `server/` modules and additive SQL schema prepare a shared revision store and owner-only API for the existing Sites host. They are not included in `dist/`, not connected to the current frontend, and do not provision resources or make AI calls. See [connection options, verified official sources, and integration gates](docs/ai-connection-options.md).
+The existing frontend now supports explicit selection of browser-local or shared storage. The `server/` modules, additive SQL and bundled Worker connect that interface to the owner-only revision store. Shared mode remains disabled until the approved server deployment is configured; no resources are provisioned by building or testing. No AI services are contacted. See [connection options, verified official sources, and integration gates](docs/ai-connection-options.md).
 
-Additional offline tests use Node 22.13+ / Node 24 built-in SQLite, with no package installation:
+Offline tests use Node 22.13+ / Node 24 built-in SQLite. Install the pinned development-only build dependency with `npm ci --no-audit --no-fund`, then run:
 
 ```sh
 node --test tests/*.test.mjs
 ```
 
-No real task data is included in test fixtures. Live cross-browser sync still requires the trusted Sites Worker wrapper, approved D1 setup, explicit migration, independent backup/restore validation, and deployment approval.
+No real task data is included in test fixtures. Source integration and synthetic browser tests are complete; live cross-browser sync still requires approved D1 setup, real Sites identity validation, explicit migration, independent backup/restore validation and deployment approval. See [the operation and deployment runbook](docs/shared-storage-runbook.md).
+
+
+Build the retained frontend and server into the existing Site's Worker artifact without deploying:
+
+```sh
+npm run build:sites
+python tests/shared_browser_test.py
+```
+
+The artifact is written under ignored `build/sites/`; `dist/` remains editable source. Browser tests use only synthetic profiles and records. For the exact tested scope and outstanding production gates, read `PROJECT_MEMORY.md` on the current feature branch.
